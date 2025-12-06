@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "631990539487",
+    "project_id": "videonest-40042",
+    "storage_bucket": "videonest-40042.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631990539487:android:fdc1d207b5642f5413c56a",
+        "android_client_info": {
+          "package_name": "com.example.videonest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "631990539487-716v0j6cqo0hdapog3a9gjaq3kb32g6r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.videonest",
+            "certificate_hash": "d85c47bb175b9392acc9ad45c0f17f5f1da26fde"
+          }
+        },
+        {
+          "client_id": "631990539487-mjpbr5vpukp59qgh9f89bjeakfacnmsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkQkJ4QyYs2DSSlyzvp9lWMpdzZK9UpwM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "631990539487-mjpbr5vpukp59qgh9f89bjeakfacnmsv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "631990539487-v8g6hakrihp55do2ef614t6r6neqshqa.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.videonest"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
