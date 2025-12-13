@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/profile_screen.dart';   // ⭐ новый импорт
+import 'screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,7 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   User? user;
 
-  // ⭐ Вход через Google
+  // Вход через Google
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -57,25 +58,59 @@ class _AuthPageState extends State<AuthPage> {
         idToken: googleAuth.idToken,
       );
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      final result =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final currentUser = result.user;
+
+      // Сохраняем пользователя в Firestore, если UID валидный
+      if (currentUser != null && currentUser.uid.isNotEmpty) {
+        final doc =
+            FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+        final snapshot = await doc.get();
+        if (!snapshot.exists) {
+          await doc.set({
+            'email': currentUser.email ?? 'unknown',
+            'name': currentUser.displayName ?? 'Пользователь',
+            'admin': false,
+          });
+        }
+      }
+
+      return result;
     } catch (e) {
       debugPrint("Ошибка входа через Google: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Ошибка входа через Google")),
+        const SnackBar(content: Text("Ошибка входа через Google")),
       );
       return null;
     }
   }
 
-  // ⭐ Гостевой вход
+  // Гостевой вход
   Future<UserCredential?> signInAnonymously() async {
     try {
       final result = await FirebaseAuth.instance.signInAnonymously();
+      final currentUser = result.user;
+
+      // Сохраняем гостевого пользователя в Firestore
+      if (currentUser != null && currentUser.uid.isNotEmpty) {
+        final doc =
+            FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+        final snapshot = await doc.get();
+        if (!snapshot.exists) {
+          await doc.set({
+            'email': currentUser.email ?? 'guest_${currentUser.uid}',
+            'name': 'Гость',
+            'admin': false,
+          });
+        }
+      }
+
       return result;
     } catch (e) {
       debugPrint("Ошибка гостевого входа: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Ошибка гостевого входа")),
+        const SnackBar(content: Text("Ошибка гостевого входа")),
       );
       return null;
     }
@@ -109,7 +144,6 @@ class _AuthPageState extends State<AuthPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
-
                 ElevatedButton.icon(
                   icon: const Icon(Icons.login, color: Colors.white),
                   label: const Text("Войти через Google"),
@@ -127,9 +161,7 @@ class _AuthPageState extends State<AuthPage> {
                     if (result != null) setState(() => user = result.user);
                   },
                 ),
-
                 const SizedBox(height: 20),
-
                 OutlinedButton.icon(
                   icon: const Icon(Icons.person_outline),
                   label: const Text("Продолжить как гость"),
@@ -147,7 +179,6 @@ class _AuthPageState extends State<AuthPage> {
                     if (result != null) setState(() => user = result.user);
                   },
                 ),
-
                 const SizedBox(height: 60),
                 const Text(
                   "Войдите чтобы загружать видео\nили смотрите как гость",
@@ -167,11 +198,6 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 }
-
-//
-// ⭐⭐ ОБНОВЛЁННЫЕ НИЖНИЙ БАР + СТРАНИЦЫ ⭐⭐
-//   Главная | Вы | Настройки
-//
 
 class MainScreen extends StatefulWidget {
   final User user;
